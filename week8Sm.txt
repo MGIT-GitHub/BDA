@@ -1,0 +1,92 @@
+install.packages(c("tidyverse", "ggplot2"))
+
+library(tidyverse)
+library(ggplot2)
+
+
+# paste SM.csv in D drive
+setwd("D:/")
+
+file_path <- "SM.csv"
+
+social_data <- read.csv(file_path)
+
+#1
+head(social_data)
+
+#2
+colSums(is.na(social_data))
+
+#3
+social_data<-social_data%>%
+mutate(PROFILE=str_replace_all(PROFILE,"\\xa0|\\<U\\+0002F90D>",""),
+Platform=str_replace_all(Platform,"\\xa0",""))
+head(social_data)
+
+#4
+social_data<-social_data%>%
+mutate(PROFILE=str_replace_all(PROFILE,"􀳦",""),
+Platform=str_replace_all(Platform,"􀳦",""))
+head(social_data,10)
+
+#5 bar plot for top profile by followers
+top_profiles_followers <- social_data%>%
+arrange(desc(FOLLOWERS))%>%
+slice(1:10)
+ggplot(top_profiles_followers,aes(x=reorder(PROFILE,-FOLLOWERS),
+y=FOLLOWERS, fill =Platform))+
+geom_bar(stat="identity")+
+coord_flip()+
+labs(title="Top10ProfilesbyFollowers",
+x="Profile",
+y="NumberofFollowers",
+fill="Platform")+
+theme_minimal()
+
+
+#6 Scatter plot of followers vs. posts
+ggplot(social_data, aes(x = POSTS, y = FOLLOWERS, color = Platform)) +
+geom_point(size = 3, alpha = 0.7) +
+labs(title = "Followers vs. Posts",
+x = "Number of Posts",
+y = "Number of Followers",
+color = "Platform") +
+theme_minimal()
+
+
+#7 Boxplot of followers by platform
+ggplot(social_data, aes(x = Platform, y = POSTS, fill = Platform)) +
+geom_boxplot() +
+scale_y_log10() + 
+labs(title = "Distribution of Followers by Platform",
+x = "Platform",
+y = "Number of Posts (Log Scale)") +
+theme_minimal() +
+theme(legend.position = "none")
+
+
+#8 bar plot for avg followers by platform
+avg_followers_platform <- social_data %>%
+group_by(Platform) %>%
+summarise(Average_Followers = mean(FOLLOWERS))
+# Plot the average followers by platform
+ggplot(avg_followers_platform, aes(x = reorder(Platform,-Average_Followers),
+y = Average_Followers, fill = Platform)) +
+geom_bar(stat = "identity") +
+labs(title = "Average Followers by Platform",
+x = "Platform",
+y = "Average Number of Followers") +
+theme_minimal() +
+theme(legend.position = "none")
+
+
+#9 Histogram of followers
+ggplot(social_data, aes(x = FOLLOWERS, fill = Platform)) +
+geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+scale_x_log10() + # Log scale to handle large range of follower
+counts
+labs(title = "Distribution of Followers",
+x = "Number of Followers (Log Scale)",
+y = "Count",
+fill = "Platform") +
+theme_minimal()

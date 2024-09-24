@@ -1,0 +1,42 @@
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("pastecs") 
+
+library(dplyr)
+library(ggplot2)
+library(pastecs)
+
+big_data <- read.csv("D:/data.csv")  
+
+#1
+ str(big_data)
+
+#2 Summary statistics
+ summary(big_data)
+
+#3
+ quantile(big_data$Sales_Amount, 0.4)
+
+#4
+ stat.desc(big_data)
+
+#5
+ stat.desc(big_data[c('Product_ID', 'Sales_Amount')])
+
+#6 data manip
+ total_sales <- big_data %>%
+  group_by(Product_Category) %>%
+ summarise(Total_Sales = sum(Sales_Amount))
+
+#7 bar plot
+ ggplot(total_sales, aes(x = Product_Category, y = Total_Sales)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Total Sales by Product Category",
+       x = "Product Category",
+       y = "Total Sales") +
+  theme_minimal()
+
+#8 histogram
+ ggplot(big_data) +
+aes(x = Sales_Amount) +
+  geom_histogram() 

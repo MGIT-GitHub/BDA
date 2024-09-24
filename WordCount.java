@@ -1,0 +1,81 @@
+package com.mlrit;
+
+// // 1) hadoop fs -copyFromLocal data.txt/tmp
+// // 2) hadoop jar wc.jar bda.WordCount /tmp/data.txt op10
+// // 3) hadoop fs -cat op/part-*
+
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+
+public class WordCount  {
+
+	public static class WordCountMapper extends Mapper<LongWritable,Text,Text,IntWritable>
+	{
+
+		private static final IntWritable one=new IntWritable(1);
+		@Override
+		protected void map(LongWritable key, Text value, Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+				throws IOException, InterruptedException {
+			// TODO Auto-generated method stub
+			String word;
+			String line=value.toString();
+			java.util.StringTokenizer tokenizer=new java.util.StringTokenizer(line);
+			while(tokenizer.hasMoreTokens())
+			{
+				word = tokenizer.nextToken();
+				context.write(new Text(word), one);
+			}
+			
+		}
+		
+	}
+	public static class WordCountReducer extends Reducer<Text, Iterable<IntWritable>, Text, IntWritable> {
+
+		@Override
+		protected void reduce(Text key, Iterable<Iterable<IntWritable>> value,
+				Reducer<Text, Iterable<IntWritable>, Text, IntWritable>.Context context)
+						throws IOException, InterruptedException {
+			// TODO Auto-generated method stub
+			int sum = 0;
+			Iterator<Iterable<IntWritable>> itr = value.iterator();
+			while (itr.hasNext()) {
+				IntWritable iw = (IntWritable) itr.next();
+				sum = sum + iw.get();
+			}
+			context.write(key, new IntWritable(sum));
+
+		}
+
+	}
+	@SuppressWarnings("deprecation")
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		try {
+			Job j = new Job(new Configuration());
+			j.setJarByClass(WordCount.class);
+			j.setJobName("wordcount");
+			FileInputFormat.addInputPath(j, new Path(args[1]));
+			FileOutputFormat.setOutputPath(j, new Path(args[2]));
+			j.setMapperClass(WordCountMapper.class);
+			j.setCombinerClass(WordCountReducer.class);
+			j.setReducerClass(WordCountReducer.class);
+			j.setOutputKeyClass(Text.class);
+			j.setOutputValueClass(IntWritable.class);
+			j.waitForCompletion(true);
+		} catch (Exception e) {
+		}
+		
+	}
+
+}
