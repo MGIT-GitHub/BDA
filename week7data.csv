@@ -1,0 +1,11 @@
+Product_ID,Product_Category,Sales_Amount,Date
+ 1,Electronics,150,2022-03-15
+ 2,Clothing,80,2022-07-22
+ 3,Books,120,2022-05-10
+ 4,Home Decor,90,2022-08-05
+ 5,Electronics,200,2022-01-28
+ 6,Clothing,50,2022-11-14
+ 7,Books,110,2022-09-19
+ 8,Home Decor,70,2022-04-03
+ 9,Electronics,180,2022-06-30
+ 10,Clothing,70,2022-10-17
